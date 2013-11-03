@@ -47,6 +47,7 @@
 
     /**
      * @constructor
+     * @class Armap
      * @param {string} key
      * @param {Array.<string>=} indexes
      * @param {Array.<*>} defaults
@@ -286,7 +287,7 @@
     Armap.prototype.$indexOf = function ($id) {
         return this.indexOf(this.$$map[$id]);
     }
-    
+
     /**
      * Hash list
      * @return {Object.<string, Object>}
@@ -305,6 +306,6 @@
     }
 
     if (typeof window === 'object' && typeof window.document === 'object' ) {
-        window.Armap = Armap;
+        window['Armap'] = Armap;
     }
 })();
