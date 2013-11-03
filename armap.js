@@ -49,10 +49,10 @@
      * @constructor
      * @param {string} key
      * @param {Array.<string>=} indexes
-     * @papam {Array.<Function>=} getters
      * @param {Array.<*>} defaults
+     * @papam {Array.<Function>=} getters
      */
-    function Armap(key, indexes, getters, defaults) {
+    function Armap(key, indexes, defaults, getters) {
         /** @type {string} */
         this.$key = key || 'id';
         /** @type {Array.<string>} */
@@ -270,7 +270,7 @@
      */
     Armap.prototype.$valuesByAggregateKeys = function (keys, responseType) {
         var self = this,
-            r = responseType || new Armap(this.$key, this.$indexes, this.$getters, this.$defaults);
+            r = responseType || new Armap(this.$key, this.$indexes, this.$defaults, this.$getters);
 
         this.$keysByAggregateKey(keys).forEach(function (v) {
             (r instanceof Armap && r.$push || r.push).call(r, self.$$map[v]);

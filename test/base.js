@@ -107,4 +107,43 @@ describe('armap.js', function () {
         });
     });
 
+    describe('Advanced functionality', function () {
+        var armap;
+
+        before(function () {
+            armap = new Armap(
+                'id',
+                ['index1', 'index2'],
+                ['b'], // defaults
+                [undefined, function (key, item) { // getters
+                    return item.id % 2 ? 'e' : ['d', 'c'];
+                }]
+            );
+            armap.$push({id: 1, index1: 1});
+            armap.$push({id: 2});
+            armap.$push({id: 3, index1: 1});
+            armap.$push({id: 4});
+            armap.$push({id: 5, index1: 1});
+            armap.$push({id: 6});
+            armap.$push({id: 7, index1: 1});
+            armap.$push({id: 8});
+            armap.$push({id: 9, index1: 1});
+            armap.$push({id: 10});
+        });
+
+        it('Should provide default index value', function () {
+            assert.equal(armap.$keysByAggregateKey({index1: 1}).length, 5);
+            assert.equal(armap.$keysByAggregateKey({index1: 'b'}).length, 5);
+            assert.deepEqual(armap.$keysByAggregateKey({index1: 1}), [1, 3, 5, 7, 9]);
+            assert.deepEqual(armap.$keysByAggregateKey({index1: 'b'}), [2, 4, 6, 8, 10]);
+        });
+
+        it('Should check index getter', function () {
+            assert.deepEqual(armap.$aggregatedKeys('index2', 'e'), [1, 3, 5, 7, 9]);
+            assert.deepEqual(armap.$aggregatedKeys('index2', 'd'), [2, 4, 6, 8, 10]);
+            assert.deepEqual(armap.$aggregatedKeys('index2', 'c'), [2, 4, 6, 8, 10]);
+        })
+
+    })
+
 })
