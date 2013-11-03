@@ -179,7 +179,7 @@
         if ($id in this.$$map) {
             removeIndexes.call(this, this.$$map[$id], true);
             var i = this.$indexOf($id);
-            this[i] = this.$map[$id] = item;
+            this[i] = this.$$map[$id] = item;
         } else {
             var idx = this.length;
             this.push(item);
