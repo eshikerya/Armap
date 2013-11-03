@@ -1,6 +1,4 @@
 # Armap [![Build Status](https://travis-ci.org/eshikerya/Armap.png?branch=master)](https://travis-ci.org/eshikerya/Armap)
-=====
-
 mix of Array and Hash object
 
 ## Why?
@@ -25,6 +23,7 @@ where:
 * *{array}defaultValuesForIndexes* - list of default values for indexes which is not set in record
 * *{array}getterForIndexesValues* - list of the index getters
 example:
+
 ```javascript
 var data = [
   {id: 1, name: 'John', age: 30, sex: 'male', department: 'development'},
@@ -51,6 +50,8 @@ for (var l = data.length, i = 0; i < l; i++) {
 retrieve record from collection by the key
 ```javascript
 console.log(armap.$item(1));
+
+> {id: 1, name: 'John', age: 30, sex: 'male', department: 'development'}
 ```
 
 License
