@@ -286,13 +286,21 @@
     Armap.prototype.$indexOf = function ($id) {
         return this.indexOf(this.$$map[$id]);
     }
+    
+    /**
+     * Hash list
+     * @return {Object.<string, Object>}
+     */
+    Armap.prototype.$hash = function () {
+        return this.$$map;
+    }
 
     // export to module/window
     if (typeof module === 'object' && module && typeof module.exports === 'object') {
         module.exports = Armap;
     } else {
         if (typeof define === 'function' && define.amd) {
-            define('armap', [], function () { return jQuery; } );
+            define('armap', [], function () { return Armap; } );
         }
     }
 
