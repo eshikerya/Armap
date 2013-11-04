@@ -45,6 +45,19 @@
         return r;
     }
 
+    function $concat (array1, array2) {
+        var r = new Array(array1.length + array2.length),
+            idx = 0;
+
+        [array1, array2].forEach(function (src) {
+            for (var l = src.length, i = 0; i < l; i++) {
+                r[idx++] = src[i];
+            }
+        });
+
+        return r;
+    }
+
     /**
      * @constructor
      * @class Armap
@@ -54,6 +67,15 @@
      * @papam {Array.<Function>=} getters
      */
     function Armap(key, indexes, defaults, getters) {
+        var $src;
+
+        if (key instanceof Array) {
+            $src = key;
+            key = indexes;
+            indexes = defaults;
+            getters = arguments[4];
+        }
+
         /** @type {string} */
         this.$key = key || 'id';
         /** @type {Array.<string>} */
@@ -68,7 +90,9 @@
         init.call(this);
 
         /** @type {number} */
-        this.lastUpdate = now()
+        this.lastUpdate = now();
+
+        if ($src) { this.$concat($src); }
     }
 
     Armap.prototype = new Array;
@@ -159,6 +183,36 @@
     }
 
     /**
+     * Recreate indexes
+     */
+    Armap.prototype.$reindex = function () {
+        init.call(this);
+
+        for (var self = this, $id, item, i = this.length; --i >= 0;) {
+            item = this[i];
+            $id = item[this.$key];
+            this.$$map[$id] = item;
+
+            this.$indexes.forEach(function (k, i) {
+                var key = item[k] != undefined ? item[k] : self.$defaults[i];
+
+                if (self.$getters[i]) {
+                    key = self.$getters[i].call(self, key, item);
+                }
+
+                if (key instanceof Array) {
+                    key.forEach(function (v) {
+                        push2Indexes.call(self, k, v, $id);
+                    });
+                } else if (key !== undefined) {
+                    push2Indexes.call(self, k, key, $id);
+                }
+            });
+        }
+        this.lastUpdate = now();
+    }
+
+    /**
      * Get item by ID
      * @param {!string} $id
      * @return {Object}
@@ -222,6 +276,16 @@
         delete this.$$map[key];
 
         this.lastUpdate = now();
+    }
+
+    /**
+     * Concatinate source array with self
+     * @param {Array} $src
+     */
+    Armap.prototype.$concat = function ($src) {
+        for (var l = $src.length, i = 0; i < l; i++) {
+            this.$push($src[i]);
+        }
     }
 
     /**
