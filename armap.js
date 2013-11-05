@@ -34,12 +34,24 @@
     }
 
     function $map ($array, callback, result, skipUndefined) {
-        result.length = $array.length;
+        var r = result || [];
+        for (var rr, l = $array.length, i = 0; i < l; i++) {
+            rr = callback.call($array, $array[i], i);
+            if (skipUndefined && rr === undefined) { continue; }
+            (r instanceof Armap && r.$push || r.push).call(r, rr);
+        }
+
+        return r;
+    }
+
+    function $filter ($array, callback, result) {
+        var r = result || [];
 
         for (var rr, l = $array.length, i = 0; i < l; i++) {
-            rr = callback.apply($array, $array[i], i);
-            if (skipUndefined && rr === undefined) { continue; }
-            r[i] = rr;
+            rr = callback.call($array, $array[i], i);
+            if (rr == true) {
+                (r instanceof Armap && r.$push || r.push).call(r, $array[i]);
+            }
         }
 
         return r;
@@ -366,6 +378,26 @@
      */
     Armap.prototype.$hash = function () {
         return this.$$map;
+    }
+
+    /**
+     * Mapping each element and return in requested form
+     * @param {function} callback
+     * @param {Armap|Array=} resultType
+     * @return {Armap|Array}
+     */
+    Armap.prototype.$map = function (callback, resultType) {
+        return $map(this, callback, resultType || new Armap(this.$key, this.$indexes, this.$defaults, this.$getters), true);
+    }
+
+    /**
+     * Filter each element against callback and return in requested form
+     * @param {function} callback
+     * @param {Armap|Array=} resultType
+     * @return {Armap|Array}
+     */
+    Armap.prototype.$filter = function (callback, resultType) {
+        return $filter(this, callback, resultType || new Armap(this.$key, this.$indexes, this.$defaults, this.$getters));
     }
 
     // export to module/window
