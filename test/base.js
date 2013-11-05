@@ -150,6 +150,35 @@ describe('armap.js', function () {
             assert.deepEqual(armap.$aggregatedKeys('index2', 'e'), [1, 3, 5, 7, 9]);
             assert.deepEqual(armap.$aggregatedKeys('index2', 'd'), [2, 4, 6, 8, 10]);
             assert.deepEqual(armap.$aggregatedKeys('index2', 'c'), [2, 4, 6, 8, 10]);
+        });
+
+        it('Should map values and skip undefined values', function () {
+            var r = armap.$map(function (v, i) {
+                return i % 2 && {
+                    id: v.id,
+                    index1: 5
+                } || undefined
+            }, new Armap('id', ['index1']));
+
+            assert.equal(r.length, 5);
+            assert.deepEqual(r.$item(2), {id: 2, index1: 5});
+            assert.deepEqual(r.$item(4), {id: 4, index1: 5});
+            assert.deepEqual(r.$item(6), {id: 6, index1: 5});
+            assert.deepEqual(r.$item(8), {id: 8, index1: 5});
+            assert.deepEqual(r.$item(10), {id: 10, index1: 5});
+        });
+
+        it('Should filter values', function () {
+            var r = armap.$filter(function (v) {
+                return !!(v.id % 2);
+            }, new Armap('id', ['index1']));
+
+            assert.equal(r.length, 5);
+            assert.deepEqual(r.$item(1), {id: 1, index1: 1});
+            assert.deepEqual(r.$item(3), {id: 3, index1: 1});
+            assert.deepEqual(r.$item(5), {id: 5, index1: 1});
+            assert.deepEqual(r.$item(7), {id: 7, index1: 1});
+            assert.deepEqual(r.$item(9), {id: 9, index1: 1});
         })
 
     })
