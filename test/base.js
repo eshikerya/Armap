@@ -105,6 +105,14 @@ describe('armap.js', function () {
             assert.deepEqual(armap.$valuesByAggregateKeys({index1: 1, index2: 1}, []), [{id: 1, index1: 1, index2: 1}, {id: 3, index1: 1, index2: 1}, {id: 5, index1: 1, index2: 1}]);
             assert.deepEqual(armap.$valuesByAggregateKeys({index1: 2, index2: 1}, []), [{id: 7, index1: 2, index2: 1}, {id: 9, index1: 2, index2: 1}]);
         });
+
+        it('Should clear index after removing all records with such index', function () {
+            [6, 7, 8, 9, 10].forEach(function (id) {
+                armap.$remove(id);
+            });
+
+            assert.equal(armap.$aggregatedKeys('index1').indexOf('2') == -1, true);
+        })
     });
 
     describe('Advanced functionality', function () {
