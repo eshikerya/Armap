@@ -322,11 +322,22 @@
 
     /**
      * Clear collection
+     * @param {function=} callback filter values to be emptied
      */
-    Armap.prototype.$empty = function () {
-        this.length = 0;
-        this.$$map = Object.create(null);
-        init.call(this);
+    Armap.prototype.$empty = function (callback) {
+        if (callback) {
+            var i = 0;
+            while (i < this.length) {
+                var r = callback.call(this, this[i], i),
+                    key = this[i][this.$key];
+
+                if (r) { this.$remove(key); } else { i++; }
+            }
+        } else {
+            this.length = 0;
+            this.$$map = Object.create(null);
+            init.call(this);
+        }
         this.lastUpdate = now();
     }
 

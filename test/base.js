@@ -58,6 +58,16 @@ describe('armap.js', function () {
             assert.equal(armap.length, 5);
         });
 
+        it('Should remove all but filter', function () {
+            armap.$empty(function (item, idx) {
+                return [2, 4].indexOf(item.id) == -1;
+            });
+
+            assert.equal(armap.length, 2);
+            assert.deepEqual(armap.$item(2), {id: 2, value: 2});
+            assert.deepEqual(armap.$item(4), {id: 4, value: 4});
+        })
+
         it('Should empty collection', function () {
             armap.$empty();
             assert.equal(armap.length, 0);
