@@ -155,7 +155,7 @@
         this.$indexes.forEach(function (k, i) {
             var c = item[k] || self.$defaults[i];
 
-            c = self.$getters[i] ? self.$getters[i].call(this, c) : c;
+            c = self.$getters[i] ? self.$getters[i].call(self, c, item) : c;
 
             if (c instanceof Array) {
                 c.forEach(function (v) {
@@ -194,7 +194,7 @@
                     if (r !== undefined) { nv = $union(nv, r); }
                 }
             } else {
-                nv = this.$$indexes[key][keys[key]] || [];
+                nv = this.$$indexes[key] && this.$$indexes[key][keys[key]] || [];
             }
             ids = ids ? $intersect(ids, nv) : nv;
         }
@@ -296,6 +296,18 @@
         delete this.$$map[key];
 
         this.lastUpdate = now();
+    }
+
+    /**
+     * Remove by index
+     * @param {Object.<string, string>} $index
+     */
+    Armap.prototype.$removeByIndex = function ($index) {
+        var keys = getIDsByKeys.call(this, $index).slice();
+
+        for (var i = keys.length; --i >= 0;) {
+            this.$remove(keys[i]);
+        };
     }
 
     /**

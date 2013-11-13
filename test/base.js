@@ -179,8 +179,18 @@ describe('armap.js', function () {
             assert.deepEqual(r.$item(5), {id: 5, index1: 1});
             assert.deepEqual(r.$item(7), {id: 7, index1: 1});
             assert.deepEqual(r.$item(9), {id: 9, index1: 1});
-        })
+        });
 
+        it('Should remove values by aggregated index', function () {
+            armap.$removeByIndex({'index2': 'e'});
+
+            assert.equal(armap.length, 5);
+            assert.deepEqual(armap.$item(2), {id: 2});
+            assert.deepEqual(armap.$item(4), {id: 4});
+            assert.deepEqual(armap.$item(6), {id: 6});
+            assert.deepEqual(armap.$item(8), {id: 8});
+            assert.deepEqual(armap.$item(10), {id: 10});
+        })
     })
 
 })
