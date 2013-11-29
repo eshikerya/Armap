@@ -74,7 +74,7 @@
      * @constructor
      * @class Armap
      * @param {string} key
-     * @param {Array.<string>=} indexes
+     * @param {Array.<string>=|string=} indexes
      * @param {Array.<*>} defaults
      * @papam {Array.<Function>=} getters
      */
@@ -86,6 +86,10 @@
             key = indexes;
             indexes = defaults;
             getters = arguments[4];
+        }
+        
+        if (indexes && typeof(indexes) == 'string') {
+            indexes = [indexes];
         }
 
         /** @type {string} */
