@@ -1,0 +1,19 @@
+{
+  "name": "Armap",
+  "main": "Armap.js",
+  "version": "0.0.1",
+  "homepage": "https://github.com/eshikerya/Armap",
+  "authors": [
+    "Jacky Shikerya <shikerya@gmail.com>"
+  ],
+  "description": "Array with hash object functionality and multiply keys support",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
