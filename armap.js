@@ -1,4 +1,24 @@
-(function () {
+(function (definition) {
+    /* jshint strict: false */
+
+    // Montage Require
+    if (typeof bootstrap === "function") {
+        bootstrap("Armap", definition);
+
+    // CommonJS
+    } else if (typeof exports === "object") {
+        module.exports = definition();
+
+    // RequireJS
+    } else if (typeof define === "function" && define.amd) {
+        define(definition);
+
+    // <script>
+    } else {
+        Armap = definition();
+    }
+
+})(function () {
     'use strict';
 
     var $slice = Array.prototype.slice;
@@ -87,7 +107,7 @@
             indexes = defaults;
             getters = arguments[4];
         }
-        
+
         if (indexes && typeof(indexes) == 'string') {
             indexes = [indexes];
         }
@@ -427,16 +447,6 @@
         return $filter(this, callback, resultType || new Armap(this.$key, this.$indexes, this.$defaults, this.$getters));
     }
 
-    // export to module/window
-    if (typeof module === 'object' && module && typeof module.exports === 'object') {
-        module.exports = Armap;
-    } else {
-        if (typeof define === 'function' && define.amd) {
-            define('armap', [], function () { return Armap; } );
-        }
-    }
+    return Armap;
 
-    if (typeof window === 'object' && typeof window.document === 'object' ) {
-        window['Armap'] = Armap;
-    }
-})();
+});
