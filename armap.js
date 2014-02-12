@@ -185,18 +185,20 @@
                 c.forEach(function (v) {
                     var a = self.$$indexes[k][v],
                         i = a ? a.indexOf(key) : -1;
+
                     i > -1 && a.splice(i, 1);
 
-                    if (self.$$indexes[k][v].length == 0) {
+                    if (a && a.length == 0) {
                         delete self.$$indexes[k][v];
                     }
                 })
             } else if (c !== undefined) {
                 var a = self.$$indexes[k][c],
                     i = a ? a.indexOf(key) : -1;
+
                 i > -1 && a.splice(i, 1);
 
-                if (self.$$indexes[k][c].length == 0) {
+                if (a && a.length == 0) {
                     delete self.$$indexes[k][c];
                 }
             }
