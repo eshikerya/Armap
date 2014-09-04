@@ -274,7 +274,7 @@
      * @param {string=} key
      */
     Armap.prototype.$push = function (item, key) {
-        var $id = key || this.$key instanceof Function ? this.$key.call(this, item) : item[this.$key],
+        var $id = key || (this.$key instanceof Function ? this.$key.call(this, item) : item[this.$key]),
             self = this;
 
         if ($id in this.$$map) {
