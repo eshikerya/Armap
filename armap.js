@@ -93,7 +93,7 @@
     /**
      * @constructor
      * @class Armap
-     * @param {string} key
+     * @param {string|function} key
      * @param {Array.<string>=|string=} indexes
      * @param {Array.<*>} defaults
      * @papam {Array.<Function>=} getters
@@ -174,7 +174,7 @@
      */
     function removeIndexes (item) {
         var self = this,
-            key = item[this.$key];
+            key = this.$key instanceof Function ? this.$key.call(this, item) : item[this.$key];
 
         this.$indexes.forEach(function (k, i) {
             var c = item[k] || self.$defaults[i];
@@ -236,7 +236,7 @@
 
         for (var self = this, $id, item, i = this.length; --i >= 0;) {
             item = this[i];
-            $id = item[this.$key];
+            $id = this.$key instanceof Function ? this.$key.call(this, item) : item[this.$key];
             this.$$map[$id] = item;
 
             this.$indexes.forEach(function (k, i) {
@@ -274,7 +274,7 @@
      * @param {string=} key
      */
     Armap.prototype.$push = function (item, key) {
-        var $id = key || item[this.$key],
+        var $id = key || this.$key instanceof Function ? this.$key.call(this, item) : item[this.$key],
             self = this;
 
         if ($id in this.$$map) {
@@ -355,7 +355,7 @@
             var i = 0;
             while (i < this.length) {
                 var r = callback.call(this, this[i], i),
-                    key = this[i][this.$key];
+                    key = this[i][this.$key instanceof Function ? this.$key.call(this, this[i]) : this.$key];
 
                 if (r) { this.$remove(key); } else { i++; }
             }

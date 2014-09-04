@@ -201,6 +201,26 @@ describe('armap.js', function () {
             assert.deepEqual(armap.$item(8), {id: 8});
             assert.deepEqual(armap.$item(10), {id: 10});
         })
+
+    })
+
+    describe('bug fixes', function () {
+        it('fix #1, remove indexes on custom key', function () {
+            var a = new Armap(function (item) { return 'key' + item.id }, ['idx1', 'idx2', 'idx3']);
+            a.$push({id: 1, idx1: 'index11', idx2: 'index12', idx3: 'idx'}, 'key1');
+            a.$push({id: 2, idx1: 'index21', idx2: 'index22', idx3: 'idx'}, 'key2');
+            a.$push({id: 3, idx1: 'index31', idx2: 'index32', idx3: 'idx'}, 'key3');
+            a.$push({id: 4, idx1: 'index41', idx2: 'index42', idx3: 'idx'}, 'key4');
+            a.$push({id: 5, idx1: 'index51', idx2: 'index52', idx3: 'idx'}, 'key5');
+            a.$push({id: 6, idx1: 'index61', idx2: 'index62', idx3: 'idx'}, 'key6');
+            a.$push({id: 7, idx1: 'index71', idx2: 'index72', idx3: 'idx'}, 'key7');
+            a.$push({id: 8, idx1: 'index81', idx2: 'index82', idx3: 'idx'}, 'key8');
+            a.$push({id: 9, idx1: 'index91', idx2: 'index92', idx3: 'idx'}, 'key9');
+
+            a.$remove('key3');
+
+            assert.equal(a.$keysByAggregateKey({idx3: 'idx'}).indexOf('key3'), -1);
+        })
     })
 
 })
