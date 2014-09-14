@@ -90,160 +90,218 @@
         return r;
     }
 
-    /**
-     * @constructor
-     * @class Armap
-     * @param {string|function} key
-     * @param {Array.<string>=|string=} indexes
-     * @param {Array.<*>} defaults
-     * @papam {Array.<Function>=} getters
-     */
-    function Armap(key, indexes, defaults, getters) {
-        var $src;
-
-        if (key instanceof Array) {
-            $src = key;
-            key = indexes;
-            indexes = defaults;
-            getters = arguments[4];
-        }
-
-        if (indexes && typeof(indexes) == 'string') {
-            indexes = [indexes];
-        }
+    var Armap = (function () {
 
         /** @type {string} */
-        this.$key = key || 'id';
+        var $key;
         /** @type {Array.<string>} */
-        this.$indexes = indexes || [];
-        /** @type {Array.<Function>} */
-        this.$getters = getters || [];
-        /** @type {Array} */
-        this.$defaults = defaults || [];
-        /** @type {Object.<string, *>} */
-        this.$$map = Object.create(null);
-
-        init.call(this);
-
-        /** @type {number} */
-        this.lastUpdate = now();
-
-        if ($src) { this.$concat($src); }
-    }
-
-    Armap.prototype = new Array;
-    Armap.prototype.constructor = Armap;
-
-    function now () {
-        return new Date().getTime();
-    }
-
-    /**
-     * Initiate indexes
-     * @this {Armap}
-     */
-    function init () {
+        var $indexes;
         /** @type {Object.<string, Array.<string>>} */
-        var p = this.$$indexes = Object.create(null);
+        var $$indexes;
+        /** @type {Array.<Function>} */
+        var $getters;
+        /** @type {Array} */
+        var $defaults;
+        /** @type {Object.<string, *>} */
+        var $$map;
+        /** @type {number} */
+        var lastUpdate;
 
-        /** Prepare namespaces for indexes */
-        this.$indexes.forEach(function (k) {
-            p[k] = Object.create(null);
-        });
-    }
+        /**
+         * @constructor
+         * @class Armap
+         * @param {string|function} key
+         * @param {Array.<string>=|string=} indexes
+         * @param {Array.<*>} defaults
+         * @papam {Array.<Function>=} getters
+         */
+        function Armap(key, indexes, defaults, getters) {
+            var $src;
 
-    /**
-     * key push helper
-     * @this {Armap}
-     * @private
-     * @param {number|string} k
-     * @param {number|string} key
-     * @param {number|string} $id
-     */
-    function push2Indexes (k, key, $id) {
-        if (!(key in this.$$indexes[k])) { this.$$indexes[k][key] = []; }
-        this.$$indexes[k][key].push($id);
-    }
+            if (key instanceof Array) {
+                $src = key;
+                key = indexes;
+                indexes = defaults;
+                getters = arguments[4];
+            }
 
-    /**
-     * remove helper
-     * @private
-     * @this {Armap}
-     * @param {!Object} item
-     * @param {boolean=} cleanup
-     */
-    function removeIndexes (item) {
-        var self = this,
-            key = this.$key instanceof Function ? this.$key.call(this, item) : item[this.$key];
+            if (indexes && typeof(indexes) == 'string') {
+                indexes = [indexes];
+            }
 
-        this.$indexes.forEach(function (k, i) {
-            var c = item[k] || self.$defaults[i];
+            $key = key || 'id';
+            $indexes = indexes || [];
+            $getters = getters || [];
+            $defaults = defaults || [];
+            $$map = Object.create(null);
 
-            c = self.$getters[i] ? self.$getters[i].call(self, c, item) : c;
+            init.call(this);
 
-            if (c instanceof Array) {
-                c.forEach(function (v) {
-                    var a = self.$$indexes[k][v],
+            lastUpdate = now();
+
+            if ($src) { this.$concat($src); }
+        }
+
+        Armap.prototype = Object.create(Array.prototype);
+        Armap.prototype.constructor = Armap;
+
+        function now () {
+            return new Date().getTime();
+        }
+
+        /**
+         * Initiate indexes
+         * @this {Armap}
+         */
+        function init () {
+            /** @type {Object.<string, Array.<string>>} */
+            $$indexes = Object.create(null);
+
+            /** Prepare namespaces for indexes */
+            $indexes.forEach(function (k) {
+                $$indexes[k] = Object.create(null);
+            });
+        }
+
+        /**
+         * key push helper
+         * @this {Armap}
+         * @private
+         * @param {number|string} k
+         * @param {number|string} key
+         * @param {number|string} $id
+         */
+        function push2Indexes (k, key, $id) {
+            if (!(key in $$indexes[k])) { $$indexes[k][key] = []; }
+            $$indexes[k][key].push($id);
+        }
+
+        /**
+         * remove helper
+         * @private
+         * @this {Armap}
+         * @param {!Object} item
+         * @param {boolean=} cleanup
+         */
+        function removeIndexes (item) {
+            var key = $key instanceof Function ? $key.call(this, item) : item[$key];
+
+            $indexes.forEach(function (k, i) {
+                var c = item[k] || $defaults[i];
+
+                c = $getters[i] ? $getters[i].call(self, c, item) : c;
+
+                if (c instanceof Array) {
+                    c.forEach(function (v) {
+                        var a = $$indexes[k][v],
+                            i = a ? a.indexOf(key) : -1;
+
+                        i > -1 && a.splice(i, 1);
+
+                        if (a && a.length == 0) {
+                            delete $$indexes[k][v];
+                        }
+                    })
+                } else if (c !== undefined) {
+                    var a = $$indexes[k][c],
                         i = a ? a.indexOf(key) : -1;
 
                     i > -1 && a.splice(i, 1);
 
                     if (a && a.length == 0) {
-                        delete self.$$indexes[k][v];
+                        delete $$indexes[k][c];
                     }
-                })
-            } else if (c !== undefined) {
-                var a = self.$$indexes[k][c],
-                    i = a ? a.indexOf(key) : -1;
-
-                i > -1 && a.splice(i, 1);
-
-                if (a && a.length == 0) {
-                    delete self.$$indexes[k][c];
                 }
-            }
-        });
-    }
-    /**
-     * Return IDs by aggregate indexes
-     * @param {!Object} keys
-     * @return {Array}
-     */
-    function getIDsByKeys (keys) {
-        var ids;
+            });
+        }
+        /**
+         * Return IDs by aggregate indexes
+         * @param {!Object} keys
+         * @return {Array}
+         */
+        function getIDsByKeys (keys) {
+            var ids;
 
-        for (var key in keys) {
-            var nv = [];
-            if (keys[key] instanceof Array) {
-                for (var i = keys[key].length; --i >= 0;) {
-                    var r = this.$$indexes[key][keys[key][i]];
-                    if (r !== undefined) { nv = $union(nv, r); }
+            for (var key in keys) {
+                var nv = [];
+                if (keys[key] instanceof Array) {
+                    for (var i = keys[key].length; --i >= 0;) {
+                        var r = $$indexes[key][keys[key][i]];
+                        if (r !== undefined) { nv = $union(nv, r); }
+                    }
+                } else {
+                    nv = $$indexes[key] && $$indexes[key][keys[key]] || [];
                 }
-            } else {
-                nv = this.$$indexes[key] && this.$$indexes[key][keys[key]] || [];
+                ids = ids ? $intersect(ids, nv) : nv;
             }
-            ids = ids ? $intersect(ids, nv) : nv;
+
+            return ids || [];
         }
 
-        return ids || [];
-    }
+        /**
+         * Recreate indexes
+         */
+        Armap.prototype.$reindex = function () {
+            init();
 
-    /**
-     * Recreate indexes
-     */
-    Armap.prototype.$reindex = function () {
-        init.call(this);
+            for (var self = this, $id, item, i = this.length; --i >= 0;) {
+                item = this[i];
+                $id = $key instanceof Function ? $key.call(this, item) : item[$key];
+                $$map[$id] = item;
 
-        for (var self = this, $id, item, i = this.length; --i >= 0;) {
-            item = this[i];
-            $id = this.$key instanceof Function ? this.$key.call(this, item) : item[this.$key];
-            this.$$map[$id] = item;
+                $indexes.forEach(function (k, i) {
+                    var key = item[k] != undefined ? item[k] : $defaults[i];
 
-            this.$indexes.forEach(function (k, i) {
-                var key = item[k] != undefined ? item[k] : self.$defaults[i];
+                    if ($getters[i]) {
+                        key = $getters[i].call(self, key, item);
+                    }
 
-                if (self.$getters[i]) {
-                    key = self.$getters[i].call(self, key, item);
+                    if (key instanceof Array) {
+                        key.forEach(function (v) {
+                            push2Indexes.call(self, k, v, $id);
+                        });
+                    } else if (key !== undefined) {
+                        push2Indexes.call(self, k, key, $id);
+                    }
+                });
+            }
+            lastUpdate = now();
+        }
+
+        /**
+         * Get item by ID
+         * @param {!string} $id
+         * @return {Object}
+         */
+        Armap.prototype.$item = function ($id) {
+            return $$map[$id];
+        }
+
+        /**
+         * Add item to array and create index
+         * if an item with same key exists - item would be replaces
+         * @param {!Object} item
+         * @param {string=} key
+         */
+        Armap.prototype.$push = function (item, key) {
+            var $id = key || ($key instanceof Function ? $key.call(this, item) : item[$key]),
+                self = this;
+
+            if ($id in $$map) {
+                removeIndexes.call(this, $$map[$id], true);
+                var i = $indexOf($id);
+                this[i] = $$map[$id] = item;
+            } else {
+                var idx = this.length;
+                this.push(item);
+                $$map[$id] = this[idx];
+            }
+
+            $indexes.forEach(function (k, i) {
+                var key = item[k] != undefined ? item[k] : $defaults[i];
+
+                if ($getters[i]) {
+                    key = $getters[i].call(self, key, item);
                 }
 
                 if (key instanceof Array) {
@@ -254,200 +312,160 @@
                     push2Indexes.call(self, k, key, $id);
                 }
             });
-        }
-        this.lastUpdate = now();
-    }
 
-    /**
-     * Get item by ID
-     * @param {!string} $id
-     * @return {Object}
-     */
-    Armap.prototype.$item = function ($id) {
-        return this.$$map[$id];
-    }
-
-    /**
-     * Add item to array and create index
-     * if an item with same key exists - item would be replaces
-     * @param {!Object} item
-     * @param {string=} key
-     */
-    Armap.prototype.$push = function (item, key) {
-        var $id = key || (this.$key instanceof Function ? this.$key.call(this, item) : item[this.$key]),
-            self = this;
-
-        if ($id in this.$$map) {
-            removeIndexes.call(this, this.$$map[$id], true);
-            var i = this.$indexOf($id);
-            this[i] = this.$$map[$id] = item;
-        } else {
-            var idx = this.length;
-            this.push(item);
-            this.$$map[$id] = this[idx];
+            lastUpdate = now();
         }
 
-        this.$indexes.forEach(function (k, i) {
-            var key = item[k] != undefined ? item[k] : self.$defaults[i];
+        /**
+         * Remove item by key
+         * @param {string} key
+         * @return {Object}
+         */
+        Armap.prototype.$remove = function (key) {
+            var item = $$map[key];
+            if (!item) { return; }
 
-            if (self.$getters[i]) {
-                key = self.$getters[i].call(self, key, item);
-            }
+            removeIndexes.call(this, item, true);
 
-            if (key instanceof Array) {
-                key.forEach(function (v) {
-                    push2Indexes.call(self, k, v, $id);
-                });
-            } else if (key !== undefined) {
-                push2Indexes.call(self, k, key, $id);
-            }
-        });
+            var i = this.indexOf(item);
+            i > -1 && this.splice(i, 1);
+            delete $$map[key];
 
-        this.lastUpdate = now();
-    }
-
-    /**
-     * Remove item by key
-     * @param {string} key
-     * @return {Object}
-     */
-    Armap.prototype.$remove = function (key) {
-        var item = this.$$map[key];
-        if (!item) { return; }
-
-        removeIndexes.call(this, item, true);
-
-        var i = this.indexOf(item);
-        i > -1 && this.splice(i, 1);
-        delete this.$$map[key];
-
-        this.lastUpdate = now();
-    }
-
-    /**
-     * Remove by index
-     * @param {Object.<string, string>} $index
-     */
-    Armap.prototype.$removeByIndex = function ($index) {
-        var keys = getIDsByKeys.call(this, $index).slice();
-
-        for (var i = keys.length; --i >= 0;) {
-            this.$remove(keys[i]);
-        };
-    }
-
-    /**
-     * Concatinate source array with self
-     * @param {Array} $src
-     */
-    Armap.prototype.$concat = function ($src) {
-        for (var l = $src.length, i = 0; i < l; i++) {
-            this.$push($src[i]);
+            lastUpdate = now();
         }
-    }
 
-    /**
-     * Clear collection
-     * @param {function=} callback filter values to be emptied
-     */
-    Armap.prototype.$empty = function (callback) {
-        if (callback) {
-            var i = 0;
-            while (i < this.length) {
-                var r = callback.call(this, this[i], i),
-                    key = this[i][this.$key instanceof Function ? this.$key.call(this, this[i]) : this.$key];
+        /**
+         * Remove by index
+         * @param {Object.<string, string>} $index
+         */
+        Armap.prototype.$removeByIndex = function ($index) {
+            var keys = getIDsByKeys.call(this, $index).slice();
 
-                if (r) { this.$remove(key); } else { i++; }
-            }
-        } else {
-            this.length = 0;
-            this.$$map = Object.create(null);
-            init.call(this);
+            for (var i = keys.length; --i >= 0;) {
+                this.$remove(keys[i]);
+            };
         }
-        this.lastUpdate = now();
-    }
 
-    /**
-     * return aggregated keys
-     * @param {string} keyName
-     * @param {string=} $value
-     * @return {Array.<string>}
-     */
-    Armap.prototype.$aggregatedKeys = function (keyName, $value) {
-        if (arguments.length == 2) {
-            return this.$$indexes[keyName] && this.$$indexes[keyName][$value] || [];
-        } else {
-            var r = [],
-                v = this.$$indexes[keyName];
-
-            for (var k in v) {
-                r.push(k);
+        /**
+         * Concatinate source array with self
+         * @param {Array} $src
+         */
+        Armap.prototype.$concat = function ($src) {
+            for (var l = $src.length, i = 0; i < l; i++) {
+                this.$push($src[i]);
             }
+        }
+
+        /**
+         * Clear collection
+         * @param {function=} callback filter values to be emptied
+         */
+        Armap.prototype.$empty = function (callback) {
+            if (callback) {
+                var i = 0;
+                while (i < this.length) {
+                    var r = callback.call(this, this[i], i),
+                        key = this[i][$key instanceof Function ? $key.call(this, this[i]) : $key];
+
+                    if (r) { this.$remove(key); } else { i++; }
+                }
+            } else {
+                this.length = 0;
+                $$map = Object.create(null);
+                init();
+            }
+            lastUpdate = now();
+        }
+
+        /**
+         * return aggregated keys
+         * @param {string} keyName
+         * @param {string=} $value
+         * @return {Array.<string>}
+         */
+        Armap.prototype.$aggregatedKeys = function (keyName, $value) {
+            if (arguments.length == 2) {
+                return $$indexes[keyName] && $$indexes[keyName][$value] || [];
+            } else {
+                var r = [],
+                    v = $$indexes[keyName];
+
+                for (var k in v) {
+                    r.push(k);
+                }
+
+                return r;
+            }
+        }
+
+        /**
+         * return keys by aggregate key
+         * @param {Object} keys
+         * @return {Array.<string>}
+         */
+        Armap.prototype.$keysByAggregateKey = function (keys) {
+            return getIDsByKeys.call(this, keys);
+        }
+
+        /**
+         * Return values by aggregate key
+         * @param {Object} keys
+         * @return {Array.<Object>}
+         */
+        Armap.prototype.$valuesByAggregateKeys = function (keys, responseType) {
+            var r = responseType || new Armap($key, $indexes, $defaults, $getters);
+
+            this.$keysByAggregateKey(keys).forEach(function (v) {
+                (r instanceof Armap && r.$push || r.push).call(r, $$map[v]);
+            });
 
             return r;
         }
-    }
 
-    /**
-     * return keys by aggregate key
-     * @param {Object} keys
-     * @return {Array.<string>}
-     */
-    Armap.prototype.$keysByAggregateKey = function (keys) {
-        return getIDsByKeys.call(this, keys);
-    }
+        /**
+         * @param {string} $id
+         * @return {Object}
+         */
+        Armap.prototype.$indexOf = function ($id) {
+            return this.indexOf($$map[$id]);
+        }
 
-    /**
-     * Return values by aggregate key
-     * @param {Object} keys
-     * @return {Array.<Object>}
-     */
-    Armap.prototype.$valuesByAggregateKeys = function (keys, responseType) {
-        var self = this,
-            r = responseType || new Armap(this.$key, this.$indexes, this.$defaults, this.$getters);
+        /**
+         * Hash list
+         * @return {Object.<string, Object>}
+         */
+        Armap.prototype.$hash = function () {
+            return $$map;
+        }
 
-        this.$keysByAggregateKey(keys).forEach(function (v) {
-            (r instanceof Armap && r.$push || r.push).call(r, self.$$map[v]);
-        });
+        /**
+         * Mapping each element and return in requested form
+         * @param {function} callback
+         * @param {Armap|Array=} resultType
+         * @return {Armap|Array}
+         */
+        Armap.prototype.$map = function (callback, resultType) {
+            return $map(this, callback, resultType || new Armap($key, $indexes, $defaults, $getters), true);
+        }
 
-        return r;
-    }
+        /**
+         * Filter each element against callback and return in requested form
+         * @param {function} callback
+         * @param {Armap|Array=} resultType
+         * @return {Armap|Array}
+         */
+        Armap.prototype.$filter = function (callback, resultType) {
+            return $filter(this, callback, resultType || new Armap($key, $indexes, $defaults, $getters));
+        }
 
-    /**
-     * @param {string} $id
-     * @return {Object}
-     */
-    Armap.prototype.$indexOf = function ($id) {
-        return this.indexOf(this.$$map[$id]);
-    }
+        Armap.prototype.$lastUpdate = function () {
+            return lastUpdate;
+        }
 
-    /**
-     * Hash list
-     * @return {Object.<string, Object>}
-     */
-    Armap.prototype.$hash = function () {
-        return this.$$map;
-    }
+        Object.defineProperty(Armap, 'length', { enumerable: false });
 
-    /**
-     * Mapping each element and return in requested form
-     * @param {function} callback
-     * @param {Armap|Array=} resultType
-     * @return {Armap|Array}
-     */
-    Armap.prototype.$map = function (callback, resultType) {
-        return $map(this, callback, resultType || new Armap(this.$key, this.$indexes, this.$defaults, this.$getters), true);
-    }
-
-    /**
-     * Filter each element against callback and return in requested form
-     * @param {function} callback
-     * @param {Armap|Array=} resultType
-     * @return {Armap|Array}
-     */
-    Armap.prototype.$filter = function (callback, resultType) {
-        return $filter(this, callback, resultType || new Armap(this.$key, this.$indexes, this.$defaults, this.$getters));
-    }
+        return Armap;
+    })();
 
     return Armap;
 
