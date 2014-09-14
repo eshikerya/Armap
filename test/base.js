@@ -68,12 +68,18 @@ describe('armap.js', function () {
             assert.deepEqual(armap.$item(4), {id: 4, value: 4});
         })
 
+        it('Should update exists item', function () {
+            armap.$push({id: 2, value: 22});
+            assert.deepEqual(armap.$item(2), {id: 2, value: 22});
+        })
+
         it('Should empty collection', function () {
             armap.$empty();
             assert.equal(armap.length, 0);
             assert.deepEqual(armap.$hash(), {});
             // assert.deepEqual(armap.$$indexes, {});
         })
+
     });
 
     describe('Indexes processing', function () {

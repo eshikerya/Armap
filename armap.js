@@ -340,7 +340,7 @@
 
             if ($id in $$map) {
                 removeIndexes.call(this, $$map[$id], true);
-                var i = $indexOf($id);
+                var i = this.$indexOf($id);
                 this[i] = $$map[$id] = item;
             } else {
                 var idx = this.length;
