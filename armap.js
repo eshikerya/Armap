@@ -23,12 +23,63 @@
 
     var $slice = Array.prototype.slice;
 
-    function $intersect (array1, array2) {
-        var r = [];
-        for (var l = array1.length, i = 0; i < l; i++) {
-            if (array2.indexOf(array1[i]) > -1 && r.indexOf(array1[i]) == -1) { r.push(array1[i]); }
+    function $intersect() {
+        var args = Array.prototype.slice.call(arguments),
+            aLower = [],
+            aStack = [],
+            count,
+            i,
+            nArgs,
+            nLower,
+            oRest = {},
+            oTmp = {},
+            value,
+            compareArrayLength = function(a, b) {
+                return (a.length - b.length);
+            },
+            indexes = function(array, oStack) {
+                var i = 0,
+                    value,
+                    nArr = array.length,
+                    oTmp = {};
+
+                for (; nArr > i; ++i) {
+                    value = array[i];
+                    if (!oTmp[value]) {
+                        oStack[value] = 1 + (oStack[value] || 0); // counter
+                        oTmp[value] = true;
+                    }
+                }
+
+                return oStack;
+            };
+
+        args.sort(compareArrayLength);
+        aLower = args.shift();
+        nLower = aLower.length;
+
+        if (0 === nLower) {
+            return aStack;
         }
-        return r;
+
+        nArgs = args.length;
+        i = nArgs;
+        while (i--) {
+            oRest = indexes(args.shift(), oRest);
+        }
+
+        for (i = 0; nLower > i; ++i) {
+            value = aLower[i];
+            count = oRest[value];
+            if (!oTmp[value]) {
+                if (nArgs === count) {
+                    aStack.push(value);
+                    oTmp[value] = true;
+                }
+            }
+        }
+
+        return aStack;
     }
 
     function $union(array1, array2) {
