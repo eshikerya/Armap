@@ -9,7 +9,7 @@ describe('armap.js', function () {
         var armap;
 
         before(function () {
-             armap = new Armap('id');
+             armap = Armap('id');
         });
 
         it('Should add values to array', function () {
@@ -86,7 +86,7 @@ describe('armap.js', function () {
         var armap;
 
         before(function () {
-            armap = new Armap('id', ['index1', 'index2']);
+            armap = Armap('id', ['index1', 'index2']);
 
             for (var i = 0; i < 50; i ++) {
                 armap.$push({id: i, index1: i % 5, index2: i % 10});
@@ -135,7 +135,7 @@ describe('armap.js', function () {
         var armap;
 
         before(function () {
-            armap = new Armap(
+            armap = Armap(
                 'id',
                 ['index1', 'index2'],
                 ['b'], // defaults
@@ -174,7 +174,7 @@ describe('armap.js', function () {
                     id: v.id,
                     index1: 5
                 } || undefined
-            }, new Armap('id', ['index1']));
+            }, Armap('id', ['index1']));
 
             assert.equal(r.length, 5);
             assert.deepEqual(r.$item(2), {id: 2, index1: 5});
@@ -187,7 +187,7 @@ describe('armap.js', function () {
         it('Should filter values', function () {
             var r = armap.$filter(function (v) {
                 return !!(v.id % 2);
-            }, new Armap('id', ['index1']));
+            }, Armap('id', ['index1']));
 
             assert.equal(r.length, 5);
             assert.deepEqual(r.$item(1), {id: 1, index1: 1});
@@ -212,7 +212,7 @@ describe('armap.js', function () {
 
     describe('bug fixes', function () {
         it('fix #1, remove indexes on custom key', function () {
-            var a = new Armap(function (item) { return 'key' + item.id }, ['idx1', 'idx2', 'idx3']);
+            var a = Armap(function (item) { return 'key' + item.id }, ['idx1', 'idx2', 'idx3']);
             a.$push({id: 1, idx1: 'index11', idx2: 'index12', idx3: 'idx'}, 'key1');
             a.$push({id: 2, idx1: 'index21', idx2: 'index22', idx3: 'idx'}, 'key2');
             a.$push({id: 3, idx1: 'index31', idx2: 'index32', idx3: 'idx'}, 'key3');

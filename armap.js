@@ -109,7 +109,7 @@
         for (var rr, l = $array.length, i = 0; i < l; i++) {
             rr = callback.call($array, $array[i], i);
             if (skipUndefined && rr === undefined) { continue; }
-            (r instanceof Armap && r.$push || r.push).call(r, rr);
+            (r.$push || r.push).call(r, rr);
         }
 
         return r;
@@ -121,7 +121,7 @@
         for (var rr, l = $array.length, i = 0; i < l; i++) {
             rr = callback.call($array, $array[i], i);
             if (rr == true) {
-                (r instanceof Armap && r.$push || r.push).call(r, $array[i]);
+                (r.$push || r.push).call(r, $array[i]);
             }
         }
 
@@ -485,7 +485,7 @@
          * @return {Armap|Array}
          */
         that.$map = function (callback, resultType) {
-            return $map(this, callback, resultType || new Armap($key, $indexes, $defaults, $getters), true);
+            return $map(this, callback, resultType || Armap($key, $indexes, $defaults, $getters), true);
         }
 
         /**
@@ -495,7 +495,7 @@
          * @return {Armap|Array}
          */
         that.$filter = function (callback, resultType) {
-            return $filter(this, callback, resultType || new Armap($key, $indexes, $defaults, $getters));
+            return $filter(this, callback, resultType || Armap($key, $indexes, $defaults, $getters));
         }
 
         that.lastUpdate = function () { return lastUpdate }
