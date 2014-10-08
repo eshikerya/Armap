@@ -154,7 +154,8 @@
      * @papam {Array.<Function>=} getters
      */
     function Armap(key, indexes, defaults, getters) {
-        var $src;
+        var $src,
+            that = this instanceof Array && this || [];
 
         if (key instanceof Array) {
             $src = key;
@@ -279,7 +280,7 @@
         /**
          * Recreate indexes
          */
-        this.$reindex = function () {
+        that.$reindex = function () {
             init.call(this);
 
             for (var self = this, $id, item, i = this.length; --i >= 0;) {
@@ -311,7 +312,7 @@
          * @param {!string} $id
          * @return {Object}
          */
-        this.$item = function ($id) {
+        that.$item = function ($id) {
             return $$map[$id];
         }
 
@@ -321,7 +322,7 @@
          * @param {!Object} item
          * @param {string=} key
          */
-        this.$push = function (item, key) {
+        that.$push = function (item, key) {
             var $id = key || getKey.call(this, item),
                 self = this;
 
@@ -359,7 +360,7 @@
          * @param {string} key
          * @return {Object}
          */
-        this.$remove = function (key) {
+        that.$remove = function (key) {
             var item = $$map[key];
             if (!item) { return; }
 
@@ -376,7 +377,7 @@
          * Remove by index
          * @param {Object.<string, string>} $index
          */
-        this.$removeByIndex = function ($index) {
+        that.$removeByIndex = function ($index) {
             var keys = getIDsByKeys.call(this, $index).slice();
 
             for (var i = keys.length; --i >= 0;) {
@@ -388,7 +389,7 @@
          * Concatinate source array with self
          * @param {Array} $src
          */
-        this.$concat = function ($src) {
+        that.$concat = function ($src) {
             for (var l = $src.length, i = 0; i < l; i++) {
                 this.$push($src[i]);
             }
@@ -398,7 +399,7 @@
          * Clear collection
          * @param {function=} callback filter values to be emptied
          */
-        this.$empty = function (callback) {
+        that.$empty = function (callback) {
             if (callback) {
                 var i = 0;
                 while (i < this.length) {
@@ -421,7 +422,7 @@
          * @param {string=} $value
          * @return {Array.<string>}
          */
-        this.$aggregatedKeys = function (keyName, $value) {
+        that.$aggregatedKeys = function (keyName, $value) {
             if (arguments.length == 2) {
                 return $$indexes[keyName] && $$indexes[keyName][$value] || [];
             } else {
@@ -441,7 +442,7 @@
          * @param {Object} keys
          * @return {Array.<string>}
          */
-        this.$keysByAggregateKey = function (keys) {
+        that.$keysByAggregateKey = function (keys) {
             return getIDsByKeys.call(this, keys);
         }
 
@@ -450,7 +451,7 @@
          * @param {Object} keys
          * @return {Array.<Object>}
          */
-        this.$valuesByAggregateKeys = function (keys, responseType) {
+        that.$valuesByAggregateKeys = function (keys, responseType) {
             var self = this,
                 r = responseType || new Armap($key, $indexes, $defaults, $getters);
 
@@ -465,7 +466,7 @@
          * @param {string} $id
          * @return {Object}
          */
-        this.$indexOf = function ($id) {
+        that.$indexOf = function ($id) {
             return this.indexOf($$map[$id]);
         }
 
@@ -473,7 +474,7 @@
          * Hash list
          * @return {Object.<string, Object>}
          */
-        this.$hash = function () {
+        that.$hash = function () {
             return $$map;
         }
 
@@ -483,7 +484,7 @@
          * @param {Armap|Array=} resultType
          * @return {Armap|Array}
          */
-        this.$map = function (callback, resultType) {
+        that.$map = function (callback, resultType) {
             return $map(this, callback, resultType || new Armap($key, $indexes, $defaults, $getters), true);
         }
 
@@ -493,18 +494,20 @@
          * @param {Armap|Array=} resultType
          * @return {Armap|Array}
          */
-        this.$filter = function (callback, resultType) {
+        that.$filter = function (callback, resultType) {
             return $filter(this, callback, resultType || new Armap($key, $indexes, $defaults, $getters));
         }
 
-        this.lastUpdate = function () { return lastUpdate }
+        that.lastUpdate = function () { return lastUpdate }
 
-        init.call(this);
+        init.call(that);
 
         /** @type {number} */
         lastUpdate = now();
 
-        if ($src) { this.$concat($src); }
+        if ($src) { that.$concat($src); }
+
+        return that;
     }
 
     Armap.prototype = new Array;
