@@ -180,6 +180,8 @@
         var $$map = Object.create(null);
         /** @type {Object.<string, Array.<string>>} */
         var $$indexes = Object.create(null);
+        /** @type {Object.<string, Object>}*/
+        var $$liveLinks = {};
         var lastUpdate = 0;
 
         /**
@@ -273,8 +275,36 @@
             return ids || [];
         }
 
+        /**
+         * Return key for item
+         * @this {Armap}
+         * @param {Object} item
+         * @return {*}
+         */
         var getKey = function getKey(item) {
             return $key instanceof Function ? $key.call(this, item) : item[$key];
+        }
+
+        /**
+         * Check keys against the item
+         * @param {Object} keys
+         * @param {Object} item
+         * @return {boolean}
+         */
+        var checkKeys = function checkKeys(keys, item) {
+            for (var k in keys) {
+                var v;
+                switch (typeof(keys[k])) {
+                    case 'function':
+                        v = keys[k].call(this, k, item);
+                        break;
+                    default:
+                        v = keys[k];
+                        break;
+                }
+                if (v == item[k]) { return true }
+            }
+            return false;
         }
 
         /**
@@ -336,6 +366,15 @@
                 $$map[$id] = this[idx];
             }
 
+            for (var k in $$liveLinks) {
+                var ll = $$liveLinks[k];
+                if (checkKeys(ll.keys, item)) {
+                    if (ll.holder.$push) {
+                        ll.holder.$push(item, key);
+                    } else ll.holder.push(item);
+                }
+            }
+
             $indexes.forEach(function (k, i) {
                 var key = item[k] != undefined ? item[k] : $defaults[i];
 
@@ -369,6 +408,16 @@
             var i = this.indexOf(item);
             i > -1 && this.splice(i, 1);
             delete $$map[key];
+            
+            for (var k in $$liveLinks) {
+                var ll = $$liveLinks[k].holder;
+                if (ll.$remove) {
+                    ll.$remove(key);
+                } else {
+                    i = ll.indexOf(item);
+                    i > -1 && ll.splice(i, 1);
+                }
+            }
 
             lastUpdate = now();
         }
@@ -440,6 +489,7 @@
         /**
          * return keys by aggregate key
          * @param {Object} keys
+         * @param {boolean} createLiveLink
          * @return {Array.<string>}
          */
         that.$keysByAggregateKey = function (keys) {
@@ -449,14 +499,30 @@
         /**
          * Return values by aggregate key
          * @param {Object} keys
+         * @param {Array|Armap} responseType
+         * @param {boolean} createLiveLink
          * @return {Array.<Object>}
          */
-        that.$valuesByAggregateKeys = function (keys, responseType) {
+        that.$valuesByAggregateKeys = function (keys, responseType, createLiveLink) {
             var self = this,
                 r = responseType || new Armap($key, $indexes, $defaults, $getters);
 
+            if (createLiveLink) {
+                var id = new Date().getTime();
+                $$liveLinks[id] = {
+                    keys: keys,
+                    holder: r
+                }
+                r.$release = (function () {
+                    return function () {
+                        $$liveLinks[id].holder = null;
+                        delete $$liveLinks[id];
+                    }
+                })();
+            }
+
             this.$keysByAggregateKey(keys).forEach(function (v) {
-                (r instanceof Armap && r.$push || r.push).call(r, $$map[v]);
+                (r.$push || r.push).call(r, $$map[v]);
             });
 
             return r;

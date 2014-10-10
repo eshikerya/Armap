@@ -208,6 +208,61 @@ describe('armap.js', function () {
             assert.deepEqual(armap.$item(10), {id: 10});
         })
 
+    });
+
+    describe('live links functionality', function () {
+        var armap;
+
+        before(function () {
+            armap = Armap('id', ['idx1', 'index2', 'index3']);
+            armap.$push({id: 1, idx1: 1, index2: 12, index3: 13});
+            armap.$push({id: 2, idx1: 1, index2: 22, index3: 23});
+            armap.$push({id: 3, idx1: 1, index2: 32, index3: 33});
+            armap.$push({id: 4, idx1: 1, index2: 42, index3: 43});
+            armap.$push({id: 5, idx1: 1, index2: 52, index3: 53});
+        })
+        it('Should create live link', function () {
+            var link = armap.$valuesByAggregateKeys({idx1: 1}, [], true);
+            assert.equal(link instanceof Array, true);
+            assert.equal(link.$release instanceof Function, true);
+            assert.equal(link.length, 5);
+            link.$release();
+        });
+        it('Should update live link(Armap type) with add', function () {
+            var link = armap.$valuesByAggregateKeys({idx1: 1}, undefined, true),
+                o = {id: 6, idx1: 1, idx2: 62};
+
+            armap.$push(o);
+            assert.deepEqual(link.$item(6), {id: 6, idx1: 1, idx2: 62});
+            link.$release();
+        })
+        it('Should update live link(Armap type) with remove', function () {
+            var link = armap.$valuesByAggregateKeys({idx1: 1}, undefined, true);
+
+            armap.$remove(6);
+            assert.deepEqual(link.$item(6), undefined);
+        })
+        it('Should update live link(Array type) with add', function () {
+            var link = armap.$valuesByAggregateKeys({idx1: 1}, [], true),
+                o = {id: 6, idx1: 1, idx2: 62};
+
+            armap.$push(o);
+            var i = link.filter(function (d) {
+                return d.id == 6;
+            })
+            assert.deepEqual(i[0], {id: 6, idx1: 1, idx2: 62});
+            link.$release();
+        })
+        it('Should update live link(Array type) with remove', function () {
+            var link = armap.$valuesByAggregateKeys({idx1: 1}, [], true);
+
+            armap.$remove(6);
+            var i = link.filter(function (d) {
+                return d.id == 6;
+            })
+            assert.equal(i.length, 0);
+            link.$release();
+        })
     })
 
     describe('bug fixes', function () {
