@@ -263,6 +263,43 @@ describe('armap.js', function () {
             assert.equal(i.length, 0);
             link.$release();
         })
+        it('Should update live link(Array type) with item update', function () {
+            var item = armap.$item(1),
+                link = armap.$valuesByAggregateKeys({idx1: 1}, [], true);
+
+            item.index2 = 111;
+
+            assert.equal(link[0].index2, 111);
+            assert.equal(link.length, 5);
+            link.$release();
+        })
+        it('Should update live link(Armap type) with item update', function () {
+            var item = armap.$item(1),
+                link = armap.$valuesByAggregateKeys({idx1: 1}, undefined, true);
+
+            item.index2 = '----';
+
+            assert.equal(link.$item(1).index2, '----');
+            link.$release();
+        })
+        it('Should update live link(Array type) with item update via $push', function () {
+            var item = {id: 2, idx1: 1, index2: '----'},
+                link = armap.$valuesByAggregateKeys({idx1: 1}, [], true);
+
+            armap.$push(item);
+
+            assert.deepEqual(link[1], item);
+            assert.equal(link.length, 5);
+        })
+        it('Should update live link(Armap type) with item update via $push', function () {
+            var item = {id: 2, idx1: 1, index2: '++++'},
+                link = armap.$valuesByAggregateKeys({idx1: 1}, undefined, true);
+
+            armap.$push(item);
+
+            assert.deepEqual(link.$item(2), item);
+            assert.equal(link.length, 5);
+        })
     })
 
     describe('bug fixes', function () {

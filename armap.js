@@ -354,11 +354,13 @@
          */
         that.$push = function (item, key) {
             var $id = key || getKey.call(this, item),
-                self = this;
+                self = this,
+                old;
 
             if ($id in $$map) {
                 removeIndexes.call(this, $$map[$id], true);
                 var i = this.$indexOf($id);
+                old = this[i];
                 this[i] = $$map[$id] = item;
             } else {
                 var idx = this.length;
@@ -369,9 +371,18 @@
             for (var k in $$liveLinks) {
                 var ll = $$liveLinks[k];
                 if (checkKeys(ll.keys, item)) {
+                    var mapItem = ll.mapFunc && ll.mapFunc.call(null, item) || item;
+
                     if (ll.holder.$push) {
-                        ll.holder.$push(item, key);
-                    } else ll.holder.push(item);
+                        ll.holder.$push(mapItem, key);
+                    } else {
+                        if (old) {
+                            var i = ll.holder.indexOf(old);
+                            i > -1 && (ll.holder[i] = mapItem) || (ll.holder.push(mapItem));
+                        } else {
+                            ll.holder.push(mapItem);
+                        }
+                    }
                 }
             }
 
@@ -408,14 +419,16 @@
             var i = this.indexOf(item);
             i > -1 && this.splice(i, 1);
             delete $$map[key];
-            
+
             for (var k in $$liveLinks) {
-                var ll = $$liveLinks[k].holder;
-                if (ll.$remove) {
-                    ll.$remove(key);
+                var lh = $$liveLinks[k].holder,
+                    mi = $$liveLinks[k].mapFunc;
+
+                if (lh.$push) {
+                    lh.$remove(key);
                 } else {
-                    i = ll.indexOf(item);
-                    i > -1 && ll.splice(i, 1);
+                    i = lh.indexOf(mi && mi.call(null, item) || item);
+                    i > -1 && lh.splice(i, 1);
                 }
             }
 
@@ -503,7 +516,7 @@
          * @param {boolean} createLiveLink
          * @return {Array.<Object>}
          */
-        that.$valuesByAggregateKeys = function (keys, responseType, createLiveLink) {
+        that.$valuesByAggregateKeys = function (keys, responseType, createLiveLink, mapFunc) {
             var self = this,
                 r = responseType || new Armap($key, $indexes, $defaults, $getters);
 
@@ -511,18 +524,21 @@
                 var id = new Date().getTime();
                 $$liveLinks[id] = {
                     keys: keys,
-                    holder: r
+                    holder: r,
+                    mapFunc: mapFunc
                 }
                 r.$release = (function () {
                     return function () {
+                        if (!$$liveLinks[id]) { return }
                         $$liveLinks[id].holder = null;
+                        $$liveLinks[id].mapFunc = null;
                         delete $$liveLinks[id];
                     }
                 })();
             }
 
             this.$keysByAggregateKey(keys).forEach(function (v) {
-                (r.$push || r.push).call(r, $$map[v]);
+                (r.$push || r.push).call(r, mapFunc && mapFunc.call(null, $$map[v]) || $$map[v]);
             });
 
             return r;
