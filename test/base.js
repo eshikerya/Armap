@@ -137,11 +137,12 @@ describe('armap.js', function () {
         before(function () {
             armap = Armap(
                 'id',
-                ['index1', 'index2'],
-                ['b'], // defaults
-                [undefined, function (key, item) { // getters
-                    return item.id % 2 ? 'e' : ['d', 'c'];
-                }]
+                {
+                    index1: 'b',
+                    index2: function (key, item) {
+                        return item.id % 2 ? 'e' : ['d', 'c'];
+                    }
+                }
             );
             armap.$push({id: 1, index1: 1});
             armap.$push({id: 2});

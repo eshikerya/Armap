@@ -24,7 +24,7 @@
     var $slice = Array.prototype.slice;
 
     function $intersect() {
-        var args = Array.prototype.slice.call(arguments),
+        var args = $slice.call(arguments),
             aLower = [],
             aStack = [],
             count,
@@ -149,33 +149,26 @@
      * @constructor
      * @class Armap
      * @param {string|function} key
-     * @param {Array.<string>=|string=} indexes
-     * @param {Array.<*>} defaults
-     * @papam {Array.<Function>=} getters
+     * @param {Array.<string>=|string=} opts
      */
-    function Armap(key, indexes, defaults, getters) {
+    function Armap(key, opts) {
         var $src,
             that = this instanceof Array && this || [];
 
         if (key instanceof Array) {
             $src = key;
-            key = indexes;
-            indexes = defaults;
-            getters = arguments[4];
-        }
-
-        if (indexes && typeof(indexes) == 'string') {
-            indexes = [indexes];
+            key = opts;
+            opts = arguments[2];
         }
 
         /** @type {string} */
         var $key = key || 'id';
         /** @type {Array.<string>} */
-        var $indexes = indexes || [];
+        var $indexes = [];
         /** @type {Array.<Function>} */
-        var $getters = getters || [];
+        var $getters = [];
         /** @type {Array} */
-        var $defaults = defaults || [];
+        var $defaults = [];
         /** @type {Object.<string, *>} */
         var $$map = Object.create(null);
         /** @type {Object.<string, Array.<string>>} */
@@ -183,6 +176,16 @@
         /** @type {Object.<string, Object>}*/
         var $$liveLinks = {};
         var lastUpdate = 0;
+
+        if (opts instanceof Array) {
+            $indexes = opts;
+        } else {
+            for (var k in opts) {
+                $indexes.push(k);
+                $getters.push(opts[k] instanceof Function && opts[k] || undefined);
+                $defaults.push(opts[k] instanceof Function ? undefined : opts[k]);
+            }
+        }
 
         /**
          * Initiate indexes
