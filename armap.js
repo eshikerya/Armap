@@ -521,7 +521,7 @@
          */
         that.$valuesByAggregateKeys = function (keys, responseType, createLiveLink, mapFunc) {
             var self = this,
-                r = responseType || new Armap($key, $indexes, $defaults, $getters);
+                r = responseType || Armap($key, opts);
 
             if (createLiveLink) {
                 var id = new Date().getTime();
@@ -570,7 +570,7 @@
          * @return {Armap|Array}
          */
         that.$map = function (callback, resultType) {
-            return $map(this, callback, resultType || Armap($key, $indexes, $defaults, $getters), true);
+            return $map(this, callback, resultType || Armap($key, opts), true);
         }
 
         /**
@@ -580,7 +580,7 @@
          * @return {Armap|Array}
          */
         that.$filter = function (callback, resultType) {
-            return $filter(this, callback, resultType || Armap($key, $indexes, $defaults, $getters));
+            return $filter(this, callback, resultType || Armap($key, opts));
         }
 
         that.lastUpdate = function () { return lastUpdate }
